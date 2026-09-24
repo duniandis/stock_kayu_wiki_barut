@@ -1,0 +1,2 @@
+# stock_kayu_wiki_barut
+stock_kayu_wiki_barut
