@@ -72,19 +72,25 @@
         min-width: 230px;
     }
 
-    .toolbar button {
-        padding: 9px 15px;
-        border: none;
-        border-radius: 6px;
-        background: #5B2C83;
-        color: white;
-        cursor: pointer;
-        font-weight: bold;
-    }
-
-    .toolbar button:hover {
-        background: #E9DDF4;
-    }
+   .toolbar button {
+       padding: 9px 15px;
+       border: none;
+       border-radius: 6px;
+       background: #5B2C83;
+       color: white;
+       cursor: pointer;
+       font-weight: bold;
+       transition: background 0.2s ease, transform 0.1s ease;
+   }
+   
+   .toolbar button:hover {
+       background: #432060;
+   }
+   
+   .toolbar button:active {
+       background: #35164D;
+       transform: scale(0.97);
+   }
 
     #status {
         background: white;
@@ -107,7 +113,7 @@
     }
 
     .section-title {
-        background: #dcebd9;
+        background: #E9DDF4;
         padding: 10px 14px;
         font-size: 15px;
         font-weight: bold;
@@ -143,7 +149,7 @@
     }
 
     th {
-        background: #dcebd9;
+        background: #E9DDF4;
         text-align: center;
         font-weight: bold;
         white-space: nowrap;
@@ -164,7 +170,7 @@
     }
 
     .total-row td {
-        background: #dcebd9;
+        background: #E9DDF4;
         font-weight: bold;
     }
 
