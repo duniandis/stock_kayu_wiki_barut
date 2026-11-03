@@ -311,7 +311,7 @@
         <input
             type="text"
             id="searchInput"
-            placeholder="Cari jenis kayu..."
+            placeholder="Cari jenis: Keruing,Benuas"
         >
 
         <select id="positionFilter">
@@ -1263,14 +1263,15 @@ function render() {
        =============================================== */
 
     if (search) {
-
-        filtered =
-            filtered.filter(
-                row =>
-                String(row.jenis)
-                    .toLowerCase()
-                    .includes(search)
-            );
+        // Beberapa jenis dapat dicari sekaligus, dipisahkan koma.
+        // Contoh: Keruing,Benuas menampilkan keduanya (logika OR).
+        const keywords = search.split(',').map(s => s.trim()).filter(Boolean);
+        if (keywords.length) {
+            filtered = filtered.filter(row => {
+                const jenis = String(row.jenis ?? '').toLowerCase();
+                return keywords.some(keyword => jenis.includes(keyword));
+            });
+        }
     }
 
 
