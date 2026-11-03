@@ -31,6 +31,9 @@
         border-radius: 10px 10px 0 0;
     }
 
+    .header-brand { display:flex; align-items:center; gap:15px; }
+    .header-logo { width:65px; height:65px; object-fit:contain; flex-shrink:0; }
+
     .header h1 {
         margin: 0;
         font-size: 24px;
@@ -219,6 +222,8 @@
             padding: 16px;
         }
 
+        .header-logo { width:48px; height:48px; }
+
         .header h1 {
             font-size: 19px;
         }
@@ -286,7 +291,7 @@
 <div class="container">
 
     <div class="header">
-        <h1>POSISI STOCK KAYU BULAT WIKI</h1>
+        <div class="header-brand"><img class="header-logo" src="LOGO.png" alt="Logo WIKI"><h1>POSISI STOCK KAYU BULAT WIKI</h1></div>
 
         <div class="header-info">
             <div>
@@ -317,6 +322,8 @@
             Reset
         </button>
 
+        <button id="downloadPdf" type="button" onclick="downloadStockPDF()">Download PDF</button>
+
         <button onclick="window.print()">
             Print
         </button>
@@ -340,6 +347,8 @@
 </div>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
 
 /* =========================================================
@@ -1401,6 +1410,92 @@ function resetFilter() {
     render();
 }
 
+
+ /* =========================================================
+    DOWNLOAD PDF - DATA SESUAI TAMPILAN/FILTER
+    ========================================================= */
+ async function downloadStockPDF() {
+     const button = document.getElementById('downloadPdf');
+     if (!stockData.length) { alert('Data stock belum tersedia.'); return; }
+     if (!window.jspdf || !window.jspdf.jsPDF) {
+         alert('Pustaka PDF belum termuat. Periksa koneksi internet lalu coba lagi.');
+         return;
+     }
+     const now = new Date();
+     const pad = n => String(n).padStart(2, '0');
+     const timestamp = now.getFullYear() + pad(now.getMonth()+1) + pad(now.getDate())
+         + '_' + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
+     const filename = 'Stock_' + timestamp + '.pdf';
+     button.disabled = true;
+     button.textContent = 'Membuat PDF...';
+     try {
+         const { jsPDF } = window.jspdf;
+         const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
+         if (typeof pdf.autoTable !== 'function') throw Error('Pustaka tabel PDF belum termuat.');
+         const pageWidth = pdf.internal.pageSize.getWidth();
+         const pageHeight = pdf.internal.pageSize.getHeight();
+         const margin = 12;
+         let y = 17;
+         pdf.setFont('helvetica','bold');
+         pdf.setFontSize(15);
+         pdf.text('POSISI STOCK KAYU BULAT WIKI', margin, y);
+         y += 7;
+         pdf.setFont('helvetica','normal');
+         pdf.setFontSize(9);
+         pdf.text('Tanggal Mutasi Terakhir Global: ' + document.getElementById('globalDate').textContent, margin, y);
+         y += 5;
+         pdf.text('Diunduh: ' + now.toLocaleString('id-ID') + ' | Sumber: nds.db', margin, y);
+         y += 9;
+         const sections = [...document.querySelectorAll('#content .stock-section')];
+         if (!sections.length) throw Error('Tidak ada tabel stock untuk disimpan.');
+         for (const section of sections) {
+             const title = section.querySelector('.section-title')?.innerText.replace(/\s+/g,' ').trim() || 'STOCK';
+             const table = section.querySelector('table');
+             if (!table) continue;
+             const headRows = [...table.querySelectorAll('thead tr')];
+             const bodyRows = [...table.querySelectorAll('tbody tr')];
+             // AutoTable membaca rowspan/colspan dari elemen HTML secara otomatis.
+             if (y > pageHeight - 35) { pdf.addPage(); y = 17; }
+             pdf.setFont('helvetica','bold');
+             pdf.setFontSize(10);
+             pdf.text(title, margin, y);
+             y += 3;
+             pdf.autoTable({
+                 html: table,
+                 startY: y,
+                 margin: { left:margin, right:margin, top:16, bottom:15 },
+                 theme: 'grid',
+                 styles: { font:'helvetica', fontSize:7, cellPadding:1.6, overflow:'linebreak', halign:'center', lineWidth:0.12, lineColor:[110,110,110] },
+                 headStyles: { fillColor:[233,221,244], textColor:[30,30,30], fontStyle:'bold' },
+                 alternateRowStyles: { fillColor:[250,248,252] },
+                 columnStyles: { 1: { halign:'left' } },
+                 tableWidth:'auto',
+                 showHead:'everyPage',
+                 didParseCell: data => {
+                     if (data.section === 'body' && data.row.raw?.classList?.contains('total-row')) {
+                         data.cell.styles.fillColor = [233,221,244];
+                         data.cell.styles.fontStyle = 'bold';
+                     }
+                 }
+             });
+             y = pdf.lastAutoTable.finalY + 12;
+         }
+         const pages = pdf.internal.getNumberOfPages();
+         for (let i=1; i<=pages; i++) {
+             pdf.setPage(i);
+             pdf.setFontSize(8);
+             pdf.setFont('helvetica','normal');
+             pdf.text('Halaman ' + i + ' / ' + pages, pageWidth-margin, pageHeight-7, {align:'right'});
+         }
+         pdf.save(filename);
+     } catch (err) {
+         console.error(err);
+         alert('Gagal membuat PDF: ' + err.message);
+     } finally {
+         button.disabled = false;
+         button.textContent = 'Download PDF';
+     }
+ }
 
 /* =========================================================
    EVENT
