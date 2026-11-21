@@ -1258,21 +1258,35 @@ function render() {
     }
 
 
-    /* ===============================================
-       FILTER JENIS
-       =============================================== */
 
-    if (search) {
-        // Beberapa jenis dapat dicari sekaligus, dipisahkan koma.
-        // Contoh: Keruing,Benuas menampilkan keduanya (logika OR).
-        const keywords = search.split(',').map(s => s.trim()).filter(Boolean);
-        if (keywords.length) {
-            filtered = filtered.filter(row => {
-                const jenis = String(row.jenis ?? '').toLowerCase();
-                return keywords.some(keyword => jenis.includes(keyword));
-            });
-        }
+/* ===============================================
+   FILTER JENIS - EXACT MATCH
+   Mendukung beberapa jenis dipisahkan koma
+   =============================================== */
+
+if (search) {
+
+    const keywords = search
+        .split(',')
+        .map(s => s.trim().toLowerCase().replace(/\s+/g, ' '))
+        .filter(Boolean);
+
+    if (keywords.length) {
+
+        filtered = filtered.filter(row => {
+
+            const jenis = String(row.jenis ?? '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, ' ');
+
+            return keywords.includes(jenis);
+
+        });
+
     }
+}
+
 
 
     const content =
