@@ -1264,28 +1264,28 @@ function render() {
    Mendukung beberapa jenis dipisahkan koma
    =============================================== */
 
-if (search) {
-
-    const keywords = search
-        .split(',')
-        .map(s => s.trim().toLowerCase().replace(/\s+/g, ' '))
-        .filter(Boolean);
-
-    if (keywords.length) {
-
-        filtered = filtered.filter(row => {
-
-            const jenis = String(row.jenis ?? '')
-                .trim()
-                .toLowerCase()
-                .replace(/\s+/g, ' ');
-
-            return keywords.includes(jenis);
-
-        });
-
+    if (search) {
+    
+        const keywords = search
+            .split(',')
+            .map(s => s.trim().toLowerCase().replace(/\s+/g, ' '))
+            .filter(Boolean);
+    
+        if (keywords.length) {
+    
+            filtered = filtered.filter(row => {
+    
+                const jenis = String(row.jenis ?? '')
+                    .trim()
+                    .toLowerCase()
+                    .replace(/\s+/g, ' ');
+    
+                return keywords.includes(jenis);
+    
+            });
+    
+        }
     }
-}
 
 
 
